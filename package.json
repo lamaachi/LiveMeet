@@ -1,0 +1,22 @@
+{
+  "name": "livemeet",
+  "version": "1.0.0",
+  "scripts": {
+    "install-client": "cd client && npm install",
+    "install-functions": "cd netlify/functions && npm install",
+    "install-all": "npm run install-client && npm install",
+    "build": "cd client && npm run build",
+    "dev": "concurrently \"cd client && npm start\" \"netlify dev\"",
+    "dev:client": "cd client && npm start",
+    "dev:netlify": "netlify dev"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "netlify-cli": "^17.38.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "serverless-http": "^3.2.0"
+  }
+}

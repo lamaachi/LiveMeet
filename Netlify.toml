@@ -1,0 +1,22 @@
+[build]
+  base = "client"
+  publish = "client/build"
+  command = "npm run build"
+[build.environment]
+  NODE_VERSION = "18"
+[functions]
+  directory = "server/functions"
+  node_bundler = "esbuild"
+
+# Redirect API calls to functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Handle React Router (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
