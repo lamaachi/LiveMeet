@@ -1,4 +1,5 @@
 # LiveMeet - Real-time Chat Application
+![Uploading image.png…]()
 
 A modern, real-time chat application built with React, TypeScript, Socket.IO, and Tailwind CSS.
 
