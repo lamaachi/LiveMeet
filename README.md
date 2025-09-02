@@ -1,5 +1,5 @@
 # LiveMeet - Real-time Chat Application
-
+<img width="1902" height="895" alt="image" src="https://github.com/user-attachments/assets/cb814702-702e-4230-b861-c1533727aa88" />
 A modern, real-time chat application built with React, TypeScript, Socket.IO, and Tailwind CSS.
 
 ## 🚀 Features
