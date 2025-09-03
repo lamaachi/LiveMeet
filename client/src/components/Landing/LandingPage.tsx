@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useSocket } from '../../contexts/SocketContext';
+import { useAuth } from '../../contexts/AuthContext';
 import JoinRoomModal from '../Auth/JoinRoomModal';
 import ChatRoom from '../chat/ChatRoom';
+import RoomsModal from '../Rooms/RoomsModal';
 
 // SVG Icons
 const MenuIcon = () => (
@@ -51,7 +54,18 @@ const LandingPage = () => {
   const [typedText, setTypedText] = useState('');
   const [currentMessage, setCurrentMessage] = useState(0);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isRoomsModalOpen, setIsRoomsModalOpen] = useState(false);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState('');
   const [currentRoom, setCurrentRoom] = useState<{ roomId: string; roomName: string } | null>(null);
+  const { socket } = useSocket();
+  const { user, login } = useAuth();
+
+  const handleJoinFromList = (roomId: string) => {
+    setIsRoomsModalOpen(false);
+    setSelectedRoomId(roomId);
+    setIsJoinModalOpen(true);
+  };
   
   const chatMessages = [
     { user: 'Alex', message: 'Hey team, ready for the project discussion?', time: '2:34 PM' },
@@ -91,20 +105,46 @@ const LandingPage = () => {
   }, []);
 
   const handleJoinRoom = (roomId: string, username: string) => {
-    // Here you would emit a 'join_room' event to the server
-    console.log(`Joining room ${roomId} as ${username}`);
-    setCurrentRoom({ roomId, roomName: `Room ${roomId}` });
-    setIsJoinModalOpen(false);
+    if (socket) {
+      const newUser = login(username);
+      socket.emit('join_room', { roomId, userId: newUser.id, username });
+    }
   };
 
   const handleCreateRoom = (username: string) => {
-    // Here you would emit a 'create_room' event to the server
-    console.log(`Creating a new room as ${username}`);
-    // For now, we'll just generate a random room ID. In a real app, the server would provide this.
-    const roomId = `room_${Date.now()}`;
-    setCurrentRoom({ roomId, roomName: `New Room` });
-    setIsJoinModalOpen(false);
+    if (socket) {
+      const newUser = login(username);
+      socket.emit('create_room', { userId: newUser.id, username });
+    }
   };
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('room_joined', (data) => {
+        setCurrentRoom({ roomId: data.roomId, roomName: `Room ${data.roomId}` });
+        setIsJoinModalOpen(false);
+      });
+
+      socket.on('room_created', (data) => {
+        setCurrentRoom({ roomId: data.roomId, roomName: `New Room` });
+        setIsJoinModalOpen(false);
+      });
+
+      // Handle errors, e.g., room not found, username taken, etc.
+      socket.on('error', (message) => {
+        console.error(message);
+        // You might want to display this error in the modal
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('room_joined');
+        socket.off('room_created');
+        socket.off('error');
+      }
+    };
+  }, [socket]);
 
   const features = [
     {
@@ -159,6 +199,13 @@ const LandingPage = () => {
         onClose={() => setIsJoinModalOpen(false)}
         onJoinRoom={handleJoinRoom}
         onCreateRoom={handleCreateRoom}
+        isCreatingDefault={isCreatingRoom}
+        initialRoomId={selectedRoomId}
+      />
+      <RoomsModal
+        isOpen={isRoomsModalOpen}
+        onClose={() => setIsRoomsModalOpen(false)}
+        onJoinRoom={handleJoinFromList}
       />
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -183,7 +230,10 @@ const LandingPage = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
-              {['Rooms', 'Features', 'Pricing', 'About'].map((item) => (
+              <button onClick={() => setIsRoomsModalOpen(true)} className="text-slate-300 hover:text-white transition-colors duration-200 font-medium">
+                Rooms
+              </button>
+              {['Features', 'Pricing', 'About'].map((item) => (
                 <a key={item} href="#" className="text-slate-300 hover:text-white transition-colors duration-200 font-medium">
                   {item}
                 </a>
@@ -273,7 +323,10 @@ const LandingPage = () => {
                 </div>
               </button>
               <button 
-                onClick={() => setIsJoinModalOpen(true)}
+                onClick={() => {
+                  setIsCreatingRoom(true);
+                  setIsJoinModalOpen(true);
+                }}
                 className="group bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 flex items-center space-x-3">
                 <MessageIcon />
                 <span>Create Room</span>

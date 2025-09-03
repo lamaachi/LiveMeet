@@ -1,22 +1,21 @@
 [build]
-  base = "client"
+  # This command will be run in the root directory
+  command = "cd client && npm install && npm run build"
+  # The directory that contains the built client-side assets
   publish = "client/build"
-  command = "npm run build"
-[build.environment]
-  NODE_VERSION = "18"
-[functions]
-  directory = "server/functions"
-  node_bundler = "esbuild"
+  # The directory where our serverless functions are located
+  functions = "netlify/functions"
 
-# Redirect API calls to functions
+[dev]
+  # When running `netlify dev`, this will be the command to start the client dev server
+  command = "cd client && npm start"
+  # The port for the client dev server
+  port = 3000
+  # The directory for the client-side code
+  publish = "client/build"
+
 [[redirects]]
+  # Proxy all API requests to our serverless function
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
-
-# Handle React Router (SPA)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = true

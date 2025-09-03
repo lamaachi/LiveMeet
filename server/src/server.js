@@ -91,6 +91,12 @@ class ChatServer {
     this.io.on('connection', (socket) => {
       logger.info(`User connected: ${socket.id}`);
       
+      // Handle get all rooms
+      socket.on('get_rooms', () => {
+        const rooms = this.socketService.getAllRooms();
+        socket.emit('rooms_list', { rooms });
+      });
+
       // Handle user creating a room
       socket.on('create_room', (data) => {
         this.chatController.handleCreateRoom(socket, data);

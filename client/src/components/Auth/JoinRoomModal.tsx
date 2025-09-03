@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Hash, Plus, ArrowRight } from 'lucide-react';
 
 interface JoinRoomModalProps {
@@ -8,6 +8,8 @@ interface JoinRoomModalProps {
   onCreateRoom: (username: string) => void;
   isLoading?: boolean;
   error?: string;
+  isCreatingDefault?: boolean;
+  initialRoomId?: string;
 }
 
 const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
@@ -16,11 +18,20 @@ const JoinRoomModal: React.FC<JoinRoomModalProps> = ({
   onJoinRoom,
   onCreateRoom,
   isLoading = false,
-  error
+  error,
+  isCreatingDefault = false,
+  initialRoomId = ''
 }) => {
   const [username, setUsername] = useState('');
-  const [roomId, setRoomId] = useState('');
-  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [roomId, setRoomId] = useState(initialRoomId);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(isCreatingDefault);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsCreatingRoom(isCreatingDefault);
+      setRoomId(initialRoomId);
+    }
+  }, [isOpen, isCreatingDefault, initialRoomId]);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();

@@ -24,7 +24,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(process.env.REACT_APP_SERVER_URL || 'http://localhost:3001');
+    const serverUrl = process.env.NODE_ENV === 'production'
+      ? '/.netlify/functions/api'
+      : 'http://localhost:3001';
+
+    const newSocket = io(serverUrl);
     setSocket(newSocket);
 
     newSocket.on('connect', () => {

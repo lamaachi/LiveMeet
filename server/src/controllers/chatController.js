@@ -30,7 +30,7 @@ class ChatController {
 
       if (success) {
         // Notify the user that the room was created and they've joined
-        socket.emit(SOCKET_EVENTS.ROOM_CREATED, {
+        socket.emit('room_created', {
           roomId,
           success: true,
           message: `Room created successfully with ID: ${roomId}`
@@ -77,7 +77,7 @@ class ChatController {
 
       if (success) {
         // Confirm to the user that they have successfully joined the room
-        socket.emit(SOCKET_EVENTS.JOIN_ROOM, {
+        socket.emit('room_joined', {
           roomId,
           success: true,
           message: `You have successfully joined room: ${roomId}`

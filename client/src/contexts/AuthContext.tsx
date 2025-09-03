@@ -11,7 +11,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string) => User;
   signup: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   error: string | null;
@@ -60,38 +60,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  const login = async (username: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Store token
-      localStorage.setItem('authToken', data.token);
-      
-      // Set user data
-      setUser(data.user);
-      
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+  const login = (username: string) => {
+    const newUser = { id: `${Date.now()}`, username };
+    setUser(newUser);
+    setIsLoading(false);
+    return newUser;
   };
 
   const signup = async (username: string, email: string, password: string) => {
